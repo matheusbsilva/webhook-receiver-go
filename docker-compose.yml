@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  sender:
+    build: ./sender/
+    environment:
+      WEBHOOK_URL: 'http://receiver:8080/receive'
+    volumes:
+      - ./sender:/app
+  
+  receiver:
+    build: ./receiver/
+    ports:
+      - 8080:8080

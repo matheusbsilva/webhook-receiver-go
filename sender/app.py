@@ -1,6 +1,8 @@
 import os
 import uuid
 import logging
+import time
+import random
 from datetime import datetime
 
 import requests
@@ -15,7 +17,6 @@ def generate_data():
             'name': f"e-{uuid.uuid4()}",
             'created_at': datetime.now().isoformat()
         }
-
     }
 
 
@@ -26,10 +27,12 @@ if __name__ == "__main__":
     logging.info(f'Sending data to {webhook_url}')
 
     while True:
+        time.sleep(random.choice(range(1, 5)))
         current_dt = datetime.now().isoformat()
+        data = generate_data()
         response = requests.post(
             webhook_url,
-            json=generate_data(),
+            json=data,
         )
 
-        logging.info(f'{current_dt} - {response.status_code} - {response.json()}')
+        logging.info(f'{current_dt} - {response.status_code} - {data["id"]}')

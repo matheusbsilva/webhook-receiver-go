@@ -4,11 +4,13 @@ services:
   sender:
     build: ./sender/
     environment:
-      WEBHOOK_URL: 'http://receiver:8080/receive'
+      WEBHOOK_URL: 'http://receiver:8080/webhook'
     volumes:
       - ./sender:/app
   
   receiver:
     build: ./receiver/
+    volumes:
+      - ./receiver/data:/root/data
     ports:
       - 8080:8080

@@ -8,6 +8,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type file interface {
+  writeFile() error
+}
+
+type jsonFile struct {
+  filepath string
+  content map[string]any
+}
+
+func (j jsonFile) writeFile() error {
+  jsonString, _ := json.Marshal(j.content)
+  return os.WriteFile(j.filepath, jsonString, os.ModePerm)
+}
+
+func saveFile(f file) {
+  f.writeFile()
+}
+
+
 func main() {
   router := gin.Default()
 
@@ -18,19 +37,19 @@ func main() {
   })
 
   router.POST("/webhook", func(c *gin.Context) {
-    var requestData map[string]interface{}
+    var requestData map[string]any
     if err:= c.BindJSON(&requestData); err != nil {
       c.JSON(400, gin.H{"error": "Invalid request"})
       return
     }
 
     go func(requestData map[string]interface{}) {
-      jsonString, _ := json.Marshal(requestData)
-      id, _ := requestData["id"]
-      filepath := fmt.Sprintf("data/%s.json", id)
-      fmt.Println(jsonString)
+      jsonData := jsonFile{
+        filepath: fmt.Sprintf("data/%s.json", requestData["id"]),
+        content: requestData,
+      }
 
-      err := os.WriteFile(filepath, jsonString, os.ModePerm)
+      err := jsonData.writeFile()
       time.Sleep(5)
 
       if err != nil {

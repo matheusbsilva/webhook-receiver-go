@@ -8,24 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type file interface {
-  writeFile() error
-}
-
-type jsonFile struct {
+type file struct {
   filepath string
   content map[string]any
 }
 
-func (j jsonFile) writeFile() error {
+func (j file) writeJsonFile() error {
   jsonString, _ := json.Marshal(j.content)
   return os.WriteFile(j.filepath, jsonString, os.ModePerm)
 }
-
-func saveFile(f file) {
-  f.writeFile()
-}
-
 
 func main() {
   router := gin.Default()
@@ -44,12 +35,12 @@ func main() {
     }
 
     go func(requestData map[string]interface{}) {
-      jsonData := jsonFile{
+      jsonData := file{
         filepath: fmt.Sprintf("data/%s.json", requestData["id"]),
         content: requestData,
       }
 
-      err := jsonData.writeFile()
+      err := jsonData.writeJsonFile()
       time.Sleep(5)
 
       if err != nil {
